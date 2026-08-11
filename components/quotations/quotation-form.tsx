@@ -71,7 +71,7 @@ export function QuotationForm({ clients }: { clients: any[] }) {
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label>Select Client</Label>
-            <Select onValueChange={(val) => setValue('client_id', val)}>
+            <Select onValueChange={(val) => setValue('client_id', val as string)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a client" />
               </SelectTrigger>
@@ -84,7 +84,7 @@ export function QuotationForm({ clients }: { clients: any[] }) {
           </div>
           <div className="space-y-2">
             <Label>Payment Terms</Label>
-            <Select defaultValue="50% Advance / 50% Completion" onValueChange={(val) => setValue('payment_terms', val)}>
+            <Select defaultValue="50% Advance / 50% Completion" onValueChange={(val) => setValue('payment_terms', val as string)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

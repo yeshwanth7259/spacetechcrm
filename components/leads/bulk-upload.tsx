@@ -32,10 +32,8 @@ export function BulkUploadLeads() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="border-dashed bg-white">
-          <Upload className="mr-2 h-4 w-4" /> Bulk Import CSV
-        </Button>
+      <DialogTrigger render={<Button variant="outline" className="border-dashed bg-white" />}>
+        <Upload className="mr-2 h-4 w-4" /> Bulk Import CSV
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
