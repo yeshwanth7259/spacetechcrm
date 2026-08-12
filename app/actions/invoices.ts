@@ -75,9 +75,23 @@ export async function createInvoice(formData: FormData) {
     status: amount_due === 0 ? 'paid' : (amount_paid > 0 ? 'partial' : 'draft')
   }
   
-  const { error } = await supabase.from('invoices').insert(invoice)
+  const { data: insertedInvoice, error } = await supabase.from('invoices').insert(invoice).select().single()
   if (error) return { error: error.message }
   
+  if (amount_paid > 0 && insertedInvoice) {
+    const payment = {
+      payment_number: `PAY-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      invoice_id: insertedInvoice.id,
+      client_id: invoice.client_id,
+      amount: amount_paid,
+      payment_date: invoice.invoice_date,
+      payment_method: 'Advance',
+      notes: 'Initial payment upon invoice creation'
+    }
+    await supabase.from('payments').insert(payment)
+  }
+  
   revalidatePath('/invoices')
+  revalidatePath('/dashboard')
   return { success: true }
 }
