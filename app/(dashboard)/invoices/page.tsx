@@ -30,6 +30,7 @@ export default async function InvoicesPage() {
               <th className="px-6 py-4">Amount</th>
               <th className="px-6 py-4">Due Date</th>
               <th className="px-6 py-4">Status</th>
+              <th className="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -56,11 +57,18 @@ export default async function InvoicesPage() {
                     {invoice.status.toUpperCase()}
                   </span>
                 </td>
+                <td className="px-6 py-4 text-right">
+                  <Link href={`/invoices/${invoice.id}`}>
+                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                      View
+                    </Button>
+                  </Link>
+                </td>
               </tr>
             ))}
             {(!invoices || invoices.length === 0) && (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                   <h3 className="mt-2 text-sm font-semibold text-gray-900">No invoices yet</h3>
                   <p className="mt-1 text-sm text-gray-500">
                     Get started by creating a new invoice.

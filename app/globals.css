@@ -128,3 +128,20 @@
     @apply font-sans;
   }
 }
+
+@media print {
+  /* Hide sidebar and navigation */
+  #sidebar, .sidebar, header, nav, button, .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Reset background and remove shadows/borders from the main container */
+  body {
+    background: white !important;
+  }
+  
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
