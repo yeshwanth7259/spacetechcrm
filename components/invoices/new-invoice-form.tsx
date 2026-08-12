@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createInvoice } from '@/app/actions/invoices'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,12 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Prevent hydration mismatch
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
   
   // States for real-time calculation
   const [subtotal, setSubtotal] = useState<number>(0)
@@ -83,7 +89,11 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="invoice_date">Invoice Date *</Label>
-              <Input id="invoice_date" name="invoice_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
+              {isMounted ? (
+                <Input id="invoice_date" name="invoice_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
+              ) : (
+                <Input id="invoice_date" name="invoice_date" type="date" required />
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="due_date">Due Date *</Label>
@@ -127,40 +137,42 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
             </div>
           )}
 
-          <div className="bg-gray-50 p-4 rounded-lg border space-y-2 mt-6">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Subtotal:</span>
-              <span>₹{subtotal.toLocaleString('en-IN')}</span>
-            </div>
-            {discount > 0 && (
-              <div className="flex justify-between text-sm text-green-600">
-                <span>Discount:</span>
-                <span>-₹{discount.toLocaleString('en-IN')}</span>
+          {isMounted && (
+            <div className="bg-gray-50 p-4 rounded-lg border space-y-2 mt-6">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Subtotal:</span>
+                <span>₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
-            )}
-            {taxEnabled && (
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>GST ({taxRate}%):</span>
-                <span>+₹{taxAmount.toLocaleString('en-IN')}</span>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount:</span>
+                  <span>-₹{discount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              {taxEnabled && (
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>GST ({taxRate}%):</span>
+                  <span>+₹{taxAmount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-medium pt-2 border-t">
+                <span>Total Invoice Amount:</span>
+                <span>₹{totalAmount.toLocaleString('en-IN')}</span>
               </div>
-            )}
-            <div className="flex justify-between text-sm font-medium pt-2 border-t">
-              <span>Total Invoice Amount:</span>
-              <span>₹{totalAmount.toLocaleString('en-IN')}</span>
-            </div>
-            {amountPaid > 0 && (
-              <div className="flex justify-between text-sm text-blue-600">
-                <span>Amount Paid Now:</span>
-                <span>-₹{amountPaid.toLocaleString('en-IN')}</span>
+              {amountPaid > 0 && (
+                <div className="flex justify-between text-sm text-blue-600">
+                  <span>Amount Paid Now:</span>
+                  <span>-₹{amountPaid.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                <span>Balance Due:</span>
+                <span className={balanceDue === 0 ? 'text-green-600' : 'text-red-600'}>
+                  ₹{balanceDue.toLocaleString('en-IN')}
+                </span>
               </div>
-            )}
-            <div className="flex justify-between text-lg font-bold pt-2 border-t">
-              <span>Balance Due:</span>
-              <span className={balanceDue === 0 ? 'text-green-600' : 'text-red-600'}>
-                ₹{balanceDue.toLocaleString('en-IN')}
-              </span>
             </div>
-          </div>
+          )}
 
           <div className="pt-4 flex justify-end gap-3 border-t mt-6">
             <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
