@@ -21,17 +21,29 @@ async function getDashboardData() {
     { count: leadsCount },
     { count: projectsCount },
     { data: quotations },
-    { data: payments }
+    { data: payments },
+    { data: invoices }
   ] = await Promise.all([
     supabase.from('leads').select('*', { count: 'exact', head: true }),
     supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('quotations').select('total_amount, status'),
-    supabase.from('payments').select('amount')
+    supabase.from('payments').select('amount'),
+    supabase.from('invoices').select('amount_due, due_date').neq('status', 'paid')
   ])
 
   const totalQuotationsCount = quotations?.length || 0
   const totalQuotationsValue = quotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0
   const totalRevenue = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+  
+  // Calculate pending invoices
+  const pendingInvoicesAmount = invoices?.reduce((sum, inv) => sum + (inv.amount_due || 0), 0) || 0
+  
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const overdueCount = invoices?.filter(inv => {
+    if (!inv.due_date) return false
+    return new Date(inv.due_date) < today
+  }).length || 0
 
   return {
     profile,
@@ -39,7 +51,9 @@ async function getDashboardData() {
     projectsCount: projectsCount || 0,
     totalQuotationsCount,
     totalQuotationsValue,
-    totalRevenue
+    totalRevenue,
+    pendingInvoicesAmount,
+    overdueCount
   }
 }
 
@@ -76,14 +90,14 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {/* Pending Invoices Dummy for now since we don't have invoices yet */}
+        {/* Pending Invoices */}
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Invoices</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <h2 className="text-3xl font-bold tracking-tight">₹0</h2>
+            <h2 className="text-3xl font-bold tracking-tight">₹{data.pendingInvoicesAmount.toLocaleString('en-IN')}</h2>
           </div>
-          <p className="mt-2 text-xs font-medium text-red-500 flex items-center">
-            0 invoices overdue
+          <p className={`mt-2 text-xs font-medium flex items-center ${data.overdueCount > 0 ? 'text-red-500' : 'text-gray-400'}`}>
+            {data.overdueCount} {data.overdueCount === 1 ? 'invoice' : 'invoices'} overdue
           </p>
         </div>
 
