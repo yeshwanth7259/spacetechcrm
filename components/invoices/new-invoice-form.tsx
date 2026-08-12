@@ -13,7 +13,18 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // States for real-time calculation
+  const [subtotal, setSubtotal] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
+  const [amountPaid, setAmountPaid] = useState<number>(0)
   const [taxEnabled, setTaxEnabled] = useState(false)
+  const [taxRate, setTaxRate] = useState<number>(18)
+
+  const amountAfterDiscount = Math.max(0, subtotal - discount)
+  const taxAmount = taxEnabled ? (amountAfterDiscount * taxRate) / 100 : 0
+  const totalAmount = amountAfterDiscount + taxAmount
+  const balanceDue = Math.max(0, totalAmount - amountPaid)
 
   async function handleSubmit(formData: FormData) {
     setIsSubmitting(true)
@@ -83,18 +94,18 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="subtotal">Subtotal Amount (₹) *</Label>
-              <Input id="subtotal" name="subtotal" type="number" required placeholder="50000" />
+              <Input id="subtotal" name="subtotal" type="number" required placeholder="50000" value={subtotal || ''} onChange={(e) => setSubtotal(Number(e.target.value))} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="discount">Discount Amount (₹)</Label>
-              <Input id="discount" name="discount" type="number" defaultValue="0" />
+              <Input id="discount" name="discount" type="number" value={discount || ''} onChange={(e) => setDiscount(Number(e.target.value))} />
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="space-y-2">
               <Label htmlFor="amount_paid">Amount Paid Now (₹)</Label>
-              <Input id="amount_paid" name="amount_paid" type="number" defaultValue="0" />
+              <Input id="amount_paid" name="amount_paid" type="number" value={amountPaid || ''} onChange={(e) => setAmountPaid(Number(e.target.value))} />
             </div>
           </div>
 
@@ -112,9 +123,44 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
           {taxEnabled && (
             <div className="space-y-2">
               <Label htmlFor="tax_rate">Tax Rate (%)</Label>
-              <Input id="tax_rate" name="tax_rate" type="number" defaultValue="18" />
+              <Input id="tax_rate" name="tax_rate" type="number" value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value))} />
             </div>
           )}
+
+          <div className="bg-gray-50 p-4 rounded-lg border space-y-2 mt-6">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Subtotal:</span>
+              <span>₹{subtotal.toLocaleString('en-IN')}</span>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Discount:</span>
+                <span>-₹{discount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+            {taxEnabled && (
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>GST ({taxRate}%):</span>
+                <span>+₹{taxAmount.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm font-medium pt-2 border-t">
+              <span>Total Invoice Amount:</span>
+              <span>₹{totalAmount.toLocaleString('en-IN')}</span>
+            </div>
+            {amountPaid > 0 && (
+              <div className="flex justify-between text-sm text-blue-600">
+                <span>Amount Paid Now:</span>
+                <span>-₹{amountPaid.toLocaleString('en-IN')}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-lg font-bold pt-2 border-t">
+              <span>Balance Due:</span>
+              <span className={balanceDue === 0 ? 'text-green-600' : 'text-red-600'}>
+                ₹{balanceDue.toLocaleString('en-IN')}
+              </span>
+            </div>
+          </div>
 
           <div className="pt-4 flex justify-end gap-3 border-t mt-6">
             <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
