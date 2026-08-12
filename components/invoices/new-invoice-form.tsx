@@ -37,10 +37,21 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
     setError(null)
     
     try {
+      if (!formData.get('client_id')) {
+        setError('Please select a client.')
+        setIsSubmitting(false)
+        return
+      }
+
       if (taxEnabled) {
         formData.append('tax_enabled', 'on')
       }
-      await createInvoice(formData)
+      const res = await createInvoice(formData)
+      if (res?.error) {
+        setError(res.error)
+        setIsSubmitting(false)
+        return
+      }
       router.push('/invoices')
     } catch (err: any) {
       setError(err.message || 'Failed to create invoice')

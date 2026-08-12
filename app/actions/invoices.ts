@@ -43,7 +43,9 @@ export async function createInvoice(formData: FormData) {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+  if (!user) return { error: 'Unauthorized' }
+  
+  if (!formData.get('client_id')) return { error: 'Client is required' }
   
   const subtotal = Number(formData.get('subtotal')) || 0
   const discount = Number(formData.get('discount')) || 0
@@ -74,7 +76,8 @@ export async function createInvoice(formData: FormData) {
   }
   
   const { error } = await supabase.from('invoices').insert(invoice)
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
   
   revalidatePath('/invoices')
+  return { success: true }
 }
