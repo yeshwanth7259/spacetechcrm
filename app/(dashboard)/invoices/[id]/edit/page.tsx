@@ -4,9 +4,10 @@ import { getProjects } from '@/app/actions/projects'
 import EditInvoiceForm from '@/components/invoices/edit-invoice-form'
 import { notFound } from 'next/navigation'
 
-export default async function EditInvoicePage({ params }: { params: { id: string } }) {
+export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
   try {
-    const invoice = await getInvoiceById(params.id)
+    const { id } = await params
+    const invoice = await getInvoiceById(id)
     if (!invoice) return notFound()
       
     const [clients, projects] = await Promise.all([

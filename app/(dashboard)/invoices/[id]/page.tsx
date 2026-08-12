@@ -7,24 +7,30 @@ import { Printer, Edit, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-export default function InvoiceDetailsPage({ params }: { params: { id: string } }) {
+import { use } from 'react'
+
+export default function InvoiceDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const { id } = use(params)
   const [invoice, setInvoice] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await getInvoiceById(params.id)
+        const data = await getInvoiceById(id)
         setInvoice(data)
-      } catch (err) {
+      } catch (err: any) {
         console.error(err)
+        setErrorMsg(err.message || 'Unknown error occurred')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [params.id])
+  }, [id])
 
   if (loading) {
     return <div className="p-8 text-center text-gray-500">Loading invoice details...</div>
@@ -33,7 +39,8 @@ export default function InvoiceDetailsPage({ params }: { params: { id: string } 
   if (!invoice) {
     return (
       <div className="p-8 text-center">
-        <h2 className="text-xl font-semibold mb-4">Invoice Not Found</h2>
+        <h2 className="text-xl font-semibold mb-4 text-red-600">Invoice Not Found</h2>
+        {errorMsg && <p className="mb-4 text-gray-700">{errorMsg}</p>}
         <Button onClick={() => router.push('/invoices')}>Back to Invoices</Button>
       </div>
     )
