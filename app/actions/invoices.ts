@@ -47,12 +47,14 @@ export async function createInvoice(formData: FormData) {
   
   const subtotal = Number(formData.get('subtotal')) || 0
   const discount = Number(formData.get('discount')) || 0
+  const amount_paid = Number(formData.get('amount_paid')) || 0
   const tax_enabled = formData.get('tax_enabled') === 'on'
   const tax_rate = tax_enabled ? Number(formData.get('tax_rate')) : 0
   
   const amount_after_discount = subtotal - discount
   const tax_amount = tax_enabled ? (amount_after_discount * tax_rate) / 100 : 0
   const total = amount_after_discount + tax_amount
+  const amount_due = Math.max(0, total - amount_paid)
   
   const invoice = {
     invoice_number: `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -66,9 +68,9 @@ export async function createInvoice(formData: FormData) {
     tax_rate,
     tax_amount,
     total,
-    amount_due: total, // Initially, amount due is total
-    amount_paid: 0,
-    status: 'draft'
+    amount_due,
+    amount_paid,
+    status: amount_due === 0 ? 'paid' : (amount_paid > 0 ? 'partial' : 'draft')
   }
   
   const { error } = await supabase.from('invoices').insert(invoice)

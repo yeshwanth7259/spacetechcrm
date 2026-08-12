@@ -16,11 +16,18 @@ async function getDashboardData() {
   const { data: { user } } = await supabase.auth.getUser()
   const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user?.id).single()
 
-  // Fetch actual counts
-  const { count: leadsCount } = await supabase.from('leads').select('*', { count: 'exact', head: true })
-  const { count: projectsCount } = await supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active')
-  const { data: quotations } = await supabase.from('quotations').select('total_amount, status')
-  const { data: payments } = await supabase.from('payments').select('amount')
+  // Fetch actual counts in parallel to prevent waterfall
+  const [
+    { count: leadsCount },
+    { count: projectsCount },
+    { data: quotations },
+    { data: payments }
+  ] = await Promise.all([
+    supabase.from('leads').select('*', { count: 'exact', head: true }),
+    supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('quotations').select('total_amount, status'),
+    supabase.from('payments').select('amount')
+  ])
 
   const totalQuotationsCount = quotations?.length || 0
   const totalQuotationsValue = quotations?.reduce((sum, q) => sum + (q.total_amount || 0), 0) || 0

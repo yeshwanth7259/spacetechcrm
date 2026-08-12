@@ -1,5 +1,5 @@
 export function amountInWords(amount: number): string {
-  if (amount === 0) return 'Zero Rupees Only'
+  if (amount === 0 || isNaN(amount) || amount === null || amount === undefined) return 'Zero Rupees Only'
 
   const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen ']
   const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']

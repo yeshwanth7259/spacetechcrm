@@ -90,6 +90,13 @@ export default function NewInvoiceForm({ clients, projects }: { clients: any[], 
               <Input id="discount" name="discount" type="number" defaultValue="0" />
             </div>
           </div>
+          
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="amount_paid">Amount Paid Now (₹)</Label>
+              <Input id="amount_paid" name="amount_paid" type="number" defaultValue="0" />
+            </div>
+          </div>
 
           <div className="flex items-center space-x-2 pt-2">
             <input 

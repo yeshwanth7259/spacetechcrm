@@ -1,6 +1,7 @@
 'use client'
 
 import { Bell, Search, UserCircle } from 'lucide-react'
+import Image from 'next/image'
 
 export function Header({ profile }: { profile?: any }) {
   return (
@@ -31,7 +32,7 @@ export function Header({ profile }: { profile?: any }) {
           </div>
           <div className="h-9 w-9 overflow-hidden rounded-full bg-gray-100 flex justify-center items-center">
             {profile?.avatar_url ? (
-               <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+               <Image src={profile.avatar_url} alt="Profile" width={36} height={36} className="h-full w-full object-cover" unoptimized />
             ) : (
                <UserCircle className="h-8 w-8 text-gray-400" />
             )}
