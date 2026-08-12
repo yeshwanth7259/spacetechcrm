@@ -76,9 +76,8 @@ export default function InvoiceDetailsPage({ params }: { params: Promise<{ id: s
           </div>
           <div className="text-right text-gray-600 text-sm space-y-1">
             <p className="font-semibold text-gray-900 text-lg">SpaceTec Business Portal</p>
-            <p>123 Tech Avenue</p>
-            <p>Bangalore, Karnataka 560001</p>
-            <p>contact@spacetech.com</p>
+            <p>Bangalore, India</p>
+            <p>info@spacetechsolutions.in</p>
           </div>
         </div>
 
